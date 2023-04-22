@@ -37,12 +37,12 @@ Respuesta:
 ```sql
 -- Su respuesta aqui:
 
-SELECT city.city, COUNT(store.store_id) AS cantidad_tienda
+SELECT city.city_id, city.city, COUNT(store.store_id) AS store_count
 FROM city
-JOIN address ON city.city_id = address.city_id
-JOIN store ON address.address_id = store.address_id
-WHERE city.city_id IN (300, 576)
-GROUP BY city.city;
+LEFT JOIN address ON city.city_id = address.city_id
+LEFT JOIN store ON address.address_id = store.address_id
+GROUP BY city.city_id
+HAVING COUNT(store.store_id) > 0
 
 ```
 
