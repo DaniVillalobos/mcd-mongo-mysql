@@ -78,13 +78,46 @@ Resultado:
 ]
 ```
 
-Respuesta1:
+### Respuesta1: (solo con language_id)
 ```
-db.film.aggregate([ { $group: { _id: "$language_id", count: { $sum: 1 } } }, { $sort: { count: -1 } }]);
+db.film.aggregate([
+  { $group: { _id: "$language_id", count: { $sum: 1 } } },
+  { $sort: { count: -1 } }
+]);
 ```
-Respuesta2:
+### Respuesta2: (con nombres de language)
 ```
-db.film.aggregate([ { $lookup: { from: "language", localField: "language_id", foreignField: "_id", as: "language" } }, { $group: { _id: { $arrayElemAt: ["$language.name", 0] }, count: { $sum: 1 } } }, { $sort: { count: -1 } }, { $project: { _id: 1, count: 1 } }]);
+db.film.aggregate([
+  {
+    $lookup: {
+      from: "language",
+      localField: "language_id",
+      foreignField: "_id",
+      as: "language"
+    }
+  },
+  {
+    $group: {
+      _id: {
+        $arrayElemAt: ["$language.name", 0]
+      },
+      count: {
+        $sum: 1
+      }
+    }
+  },
+  {
+    $sort: {
+      count: -1
+    }
+  },
+  {
+    $project: {
+      _id: 1,
+      count: 1
+    }
+  }
+]);
 ```
 
 2. Seleccionar todos los actores que participaron mas de 35 peliculas. (Ver: match, group, lookup, project)
@@ -115,15 +148,87 @@ Resutado:
 ]
 ```
 
-Respuesta1:
+### Respuesta1: (sin orden)
 
 ```
-db.film_actor.aggregate([ { $lookup: { from: "actor", localField: "actor_id", foreignField: "_id", as: "actor" } }, { $unwind: "$actor" }, { $group: { _id: "$actor._id", first_name: { $first: "$actor.first_name" }, last_name: { $first: "$actor.last_name" }, film_count: { $sum: 1 } } }, { $match: { film_count: { $gt: 35 } } }, { $project: { _id: 0, first_name: 1, last_name: 1, film_count: 1 } }]);
+db.film_actor.aggregate([
+  {
+    $lookup: {
+      from: "actor",
+      localField: "actor_id",
+      foreignField: "_id",
+      as: "actor"
+    }
+  },
+  {
+    $unwind: "$actor"
+  },
+  {
+    $group: {
+      _id: "$actor._id",
+      first_name: { $first: "$actor.first_name" },
+      last_name: { $first: "$actor.last_name" },
+      film_count: { $sum: 1 }
+    }
+  },
+  {
+    $match: { film_count: { $gt: 35 } }
+  },
+  {
+    $project: { _id: 0, first_name: 1, last_name: 1, film_count: 1 }
+  }
+]);
 ```
-Respuesta2: (ordenado de forma descendente de acuerdo a los film_count)
+### Respuesta2: (ordenado de forma descendente de acuerdo a los film_count)
 
 ```
-db.film_actor.aggregate([ { $lookup: { from: "actor", localField: "actor_id", foreignField: "_id", as: "actor" } }, { $unwind: "$actor" }, { $group: { _id: "$actor._id", first_name: { $first: "$actor.first_name" }, last_name: { $first: "$actor.last_name" }, film_count: { $sum: 1 } } }, { $match: { film_count: { $gt: 35 } } }, { $project: { _id: 0, first_name: 1, last_name: 1, film_count: 1 } }, { $sort: { film_count: -1 } }]);
+db.film_actor.aggregate([
+  {
+    $lookup: {
+      from: "actor",
+      localField: "actor_id",
+      foreignField: "_id",
+      as: "actor"
+    }
+  },
+  {
+    $unwind: "$actor"
+  },
+  {
+    $group: {
+      _id: "$actor._id",
+      first_name: {
+        $first: "$actor.first_name"
+      },
+      last_name: {
+        $first: "$actor.last_name"
+      },
+      film_count: {
+        $sum: 1
+      }
+    }
+  },
+  {
+    $match: {
+      film_count: {
+        $gt: 35
+      }
+    }
+  },
+  {
+    $project: {
+      _id: 0,
+      first_name: 1,
+      last_name: 1,
+      film_count: 1
+    }
+  },
+  {
+    $sort: {
+      film_count: -1
+    }
+  }
+]);
 ```
 
 3. Mostrar el listado de los 10 de actores que mas peliculas realizó en la categoria `Comedy`. (Ver lookup, unwind, match, group, limit)
