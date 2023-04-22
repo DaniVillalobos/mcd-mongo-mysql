@@ -80,7 +80,7 @@ Resultado:
 
 Respuesta1:
 ```
-db.film.aggregate([ { $group: { _id: "$language_id", count: { $sum: 1 } } }, { $sort: { count: -1 } }])
+db.film.aggregate([ { $group: { _id: "$language_id", count: { $sum: 1 } } }, { $sort: { count: -1 } }]);
 ```
 Respuesta2:
 ```
